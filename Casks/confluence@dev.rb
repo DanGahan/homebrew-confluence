@@ -21,11 +21,12 @@ cask "confluence@dev" do
   app "Confluence.app"
 
   caveats <<~EOS
-    Dev builds are ad-hoc signed prereleases. Install without quarantine so
-    Gatekeeper doesn't block first launch:
+    Dev builds are ad-hoc signed prereleases, not notarised, so Gatekeeper
+    blocks them on first launch. Homebrew no longer skips quarantine, so clear
+    it once after installing:
 
-      brew install --cask --no-quarantine confluence@dev
+      xattr -r -d com.apple.quarantine "/Applications/Confluence.app"
 
-    (--no-quarantine skips Gatekeeper's malware check for this app.)
+    Or approve it in System Settings > Privacy & Security > Open Anyway.
   EOS
 end

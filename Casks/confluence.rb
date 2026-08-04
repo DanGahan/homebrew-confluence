@@ -20,11 +20,12 @@ cask "confluence" do
   app "Confluence.app"
 
   caveats <<~EOS
-    Confluence is ad-hoc signed, not notarised, so Gatekeeper blocks it on
-    first launch unless you install without quarantine:
+    Confluence is ad-hoc signed, not notarised, so macOS Gatekeeper blocks it
+    on first launch. Homebrew no longer skips quarantine (the --no-quarantine
+    flag was removed), so clear it once after installing:
 
-      brew install --cask --no-quarantine confluence
+      xattr -r -d com.apple.quarantine "/Applications/Confluence.app"
 
-    (--no-quarantine skips Gatekeeper's malware check for this app.)
+    Or approve it in System Settings > Privacy & Security > Open Anyway.
   EOS
 end

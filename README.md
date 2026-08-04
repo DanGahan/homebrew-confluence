@@ -7,14 +7,25 @@ macOS Bluesky + Mastodon feed.
 
 ```sh
 brew tap DanGahan/confluence
-brew install --cask --no-quarantine confluence          # prod (latest)
-brew install --cask --no-quarantine confluence@dev       # dev prerelease track
+brew install --cask confluence          # prod (latest)
+brew install --cask confluence@dev       # dev prerelease track
 ```
 
-`--no-quarantine` is required: Confluence is ad-hoc signed, not notarised, so
-without it Gatekeeper blocks first launch and you'd have to approve the app in
-**System Settings → Privacy & Security**. The flag skips Gatekeeper's malware
-check for this app.
+Confluence is ad-hoc signed, not notarised, so macOS Gatekeeper blocks it on
+first launch. Homebrew used to let you skip this with `--no-quarantine`, but
+[that flag was removed](https://github.com/Homebrew/brew/issues/20755) as part
+of its Gatekeeper-hardening. After installing, clear the quarantine flag once:
+
+```sh
+xattr -r -d com.apple.quarantine "/Applications/Confluence.app"
+```
+
+Or approve it in **System Settings → Privacy & Security → Open Anyway**.
+
+> **Heads-up:** Homebrew is ending support for casks that fail Gatekeeper on
+> 1 Sep 2026. The proper fix is notarising the app (Apple Developer ID), after
+> which `brew install` needs no workaround. Tracked in
+> [confluence#147](https://github.com/DanGahan/confluence/issues/147).
 
 ## How it stays current
 

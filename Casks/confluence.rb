@@ -7,6 +7,12 @@ cask "confluence" do
   desc "Combined Bluesky and Mastodon timeline"
   homepage "https://github.com/DanGahan/confluence"
 
+  # Track only the "Latest" (non-prerelease) release — the prod track.
+  livecheck do
+    url :url
+    strategy :github_latest
+  end
+
   depends_on macos: :tahoe
 
   app "Confluence.app"

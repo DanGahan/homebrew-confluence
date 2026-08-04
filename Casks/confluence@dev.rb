@@ -7,6 +7,14 @@ cask "confluence@dev" do
   desc "Combined Bluesky and Mastodon timeline — dev prerelease track"
   homepage "https://github.com/DanGahan/confluence"
 
+  # Dev track = newest prerelease (tag dev-DEV_YYMMDDHHMM). `brew audit` will
+  # still flag this cask as pointing at a pre-release — that's intentional here.
+  livecheck do
+    url "https://github.com/DanGahan/confluence/releases"
+    strategy :github_releases
+    regex(/^dev-(DEV_\d+)$/i)
+  end
+
   conflicts_with cask: "confluence"
   depends_on macos: :tahoe
 

@@ -1,0 +1,65 @@
+name: Update casks
+
+# Self-contained bump: polls the confluence repo's latest prod + newest dev
+# prerelease, recomputes sha256, and commits the cask update. Uses this repo's
+# own GITHUB_TOKEN — no cross-repo PAT needed. Reading public releases needs no
+# special auth.
+#
+# ponytail: hourly poll means up to ~1h lag before a new release is installable.
+# Upgrade path if that bites: have confluence's release workflows fire a
+# repository_dispatch here on publish (needs a PAT secret) for instant bumps.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-casks
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SRC: DanGahan/confluence
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Refresh casks from latest releases
+        run: |
+          set -euxo pipefail
+
+          bump() { # $1 cask file, $2 release tag, $3 cask version
+            local file="$1" tag="$2" ver="$3" sha
+            gh release download "$tag" --repo "$SRC" --pattern 'Confluence-*.zip' \
+              --output /tmp/cask.zip --clobber
+            sha=$(sha256sum /tmp/cask.zip | cut -d' ' -f1)
+            sed -i -E "s|^(  version ).*|\1\"${ver}\"|" "$file"
+            sed -i -E "s|^(  sha256 ).*|\1\"${sha}\"|" "$file"
+          }
+
+          # Prod = the release GitHub marks "Latest".
+          PTAG=$(gh release view --repo "$SRC" --json tagName -q .tagName)
+          bump Casks/confluence.rb "$PTAG" "$PTAG"
+
+          # Dev = newest prerelease; its tag is dev-<version>.
+          DTAG=$(gh release list --repo "$SRC" \
+                   --json tagName,isPrerelease,createdAt \
+                   -q '[.[]|select(.isPrerelease)]|sort_by(.createdAt)|reverse|.[0].tagName')
+          bump 'Casks/confluence@dev.rb' "$DTAG" "${DTAG#dev-}"
+
+      - name: Commit if changed
+        run: |
+          set -euxo pipefail
+          if git diff --quiet; then
+            echo "Casks already current."
+          else
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -am "Bump casks to latest confluence releases"
+            git push
+          fi

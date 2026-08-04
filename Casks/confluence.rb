@@ -8,9 +8,11 @@ cask "confluence" do
   homepage "https://github.com/DanGahan/confluence"
 
   # Track only the "Latest" (non-prerelease) release — the prod track.
+  # Follow the /releases/latest redirect and read the YYYYMMDD[-N] tag.
   livecheck do
-    url :url
-    strategy :github_latest
+    url "https://github.com/DanGahan/confluence/releases/latest"
+    regex(%r{/tag/(\d{8}(?:-\d+)?)}i)
+    strategy :page_match
   end
 
   depends_on macos: :tahoe

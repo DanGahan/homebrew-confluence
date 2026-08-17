@@ -1,6 +1,6 @@
 cask "confluence@dev" do
-  version "DEV_2608170958"
-  sha256 "428b40e57d0a7ea0aaa327600c478d0c83aa27e8c261567c67ee2cc300f54dc9"
+  version "DEV_2608171048"
+  sha256 "6d48fe7078e7064b489e0df00fd5877f308542dbfad7bc4a0734347cc5117afd"
 
   url "https://github.com/DanGahan/confluence/releases/download/dev-#{version}/Confluence-#{version}.zip"
   name "Confluence (dev)"
